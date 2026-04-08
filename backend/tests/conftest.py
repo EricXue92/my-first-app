@@ -2,10 +2,13 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
-SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///./test.db"
+SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(
-    SQLALCHEMY_TEST_DATABASE_URL, connect_args={"check_same_thread": False}
+    SQLALCHEMY_TEST_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -37,6 +40,7 @@ def registered_user(client):
         "email": "test@example.com",
         "password": "testpassword123"
     })
+    assert r.status_code == 201, f"Registration failed: {r.json()}"
     return r.json()
 
 

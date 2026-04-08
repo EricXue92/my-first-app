@@ -1,5 +1,5 @@
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Boolean, Date, DateTime, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from database import Base
@@ -18,7 +18,7 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     todos = relationship("Todo", back_populates="owner")
 
@@ -33,7 +33,7 @@ class Todo(Base):
     completed = Column(Boolean, default=False)
     priority = Column(Enum(Priority), default=Priority.medium)
     due_date = Column(Date, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     owner = relationship("User", back_populates="todos")
