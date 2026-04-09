@@ -1,0 +1,24 @@
+services:
+  # FastAPI Backend
+  - type: web
+    name: todo-app-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false   # fill in after frontend is deployed
+
+  # React Frontend
+  - type: web
+    name: todo-app-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false   # fill in after backend is deployed
