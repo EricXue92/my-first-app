@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Todo, Priority } from '../types'
+import type { Todo, Priority } from '../types'
 import { useTodoStore } from '../store/todoStore'
 
 const priorityColors: Record<Priority, string> = {

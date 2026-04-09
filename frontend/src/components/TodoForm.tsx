@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTodoStore } from '../store/todoStore'
-import { Priority } from '../types'
+import type { Priority } from '../types'
 
 export default function TodoForm() {
   const createTodo = useTodoStore((s) => s.createTodo)

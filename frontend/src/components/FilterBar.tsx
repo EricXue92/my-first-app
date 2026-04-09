@@ -1,5 +1,5 @@
 import { useTodoStore } from '../store/todoStore'
-import { Priority } from '../types'
+import type { Priority } from '../types'
 
 const statusFilters = [
   { label: '全部', value: 'all' as const },

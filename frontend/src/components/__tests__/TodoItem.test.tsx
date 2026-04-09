@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Todo } from '../../types'
+import type { Todo } from '../../types'
 
 const mockTodo: Todo = {
   id: 1, user_id: 1, title: 'Buy groceries', description: null,

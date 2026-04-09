@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Todo, TodoCreate, TodoUpdate, Priority } from '../types'
+import type { Todo, TodoCreate, TodoUpdate, Priority } from '../types'
 import api from '../api/axios'
 
 type FilterStatus = 'all' | 'active' | 'completed'
