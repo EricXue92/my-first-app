@@ -16,9 +16,22 @@ export default function TodoPage() {
   }, [fetchMe, fetchTodos])
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)', color: 'var(--cream)' }}>
       <Navbar />
-      <main className="max-w-2xl mx-auto px-4 py-6">
+      <main className="max-w-3xl mx-auto px-6 py-10">
+        <h1
+          className="font-cormorant mb-8"
+          style={{
+            fontSize: '2rem',
+            fontWeight: 600,
+            color: 'var(--cream)',
+            letterSpacing: '0.05em',
+            borderBottom: '1px solid var(--border)',
+            paddingBottom: '1.5rem',
+          }}
+        >
+          我的任务
+        </h1>
         <TodoForm />
         <FilterBar />
         <TodoList />

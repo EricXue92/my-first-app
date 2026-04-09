@@ -25,37 +25,75 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="bg-gray-800 p-8 rounded-lg w-full max-w-sm">
-        <h1 className="text-white text-2xl font-bold mb-6 text-center">✅ TodoApp</h1>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="用户名"
-            required
-            className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-blue-400"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="密码"
-            required
-            className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-blue-400"
-          />
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+    <div
+      className="min-h-screen flex items-center justify-center px-4"
+      style={{ backgroundColor: 'var(--bg)' }}
+    >
+      <div
+        className="w-full max-w-sm px-10 py-12"
+        style={{
+          backgroundColor: 'var(--surface)',
+          border: '1px solid var(--border)',
+        }}
+      >
+        <div className="mb-10 text-center">
+          <p
+            className="font-cormorant text-4xl tracking-widest mb-2"
+            style={{ color: 'var(--gold)', fontWeight: 600, letterSpacing: '0.2em' }}
+          >
+            TASKS
+          </p>
+          <p className="text-xs tracking-widest uppercase" style={{ color: 'var(--muted)', letterSpacing: '0.15em' }}>
+            登录你的账号
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+          <div>
+            <input
+              className="input-underline"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="用户名"
+              required
+            />
+          </div>
+          <div>
+            <input
+              type="password"
+              className="input-underline"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="密码"
+              required
+            />
+          </div>
+
+          {error && (
+            <p className="text-xs" style={{ color: 'var(--brick)' }}>{error}</p>
+          )}
+
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded py-2 transition"
+            className="w-full py-3 text-sm tracking-widest uppercase font-medium transition-opacity disabled:opacity-40"
+            style={{
+              backgroundColor: 'var(--gold)',
+              color: 'var(--bg)',
+              border: 'none',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              letterSpacing: '0.15em',
+            }}
           >
             {loading ? '登录中...' : '登录'}
           </button>
         </form>
-        <p className="text-white/50 text-sm text-center mt-4">
+
+        <p className="text-xs text-center mt-8" style={{ color: 'var(--muted)' }}>
           还没有账号？{' '}
-          <Link to="/register" className="text-blue-400 hover:underline">注册</Link>
+          <Link to="/register" className="transition-colors" style={{ color: 'var(--gold)' }}>
+            注册
+          </Link>
         </p>
       </div>
     </div>

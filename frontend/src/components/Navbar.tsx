@@ -12,13 +12,32 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-gray-800 text-white px-6 py-3 flex items-center justify-between">
-      <span className="font-bold text-lg">✅ TodoApp</span>
-      <div className="flex items-center gap-4 text-sm">
-        {user && <span className="opacity-70">你好，{user.username}</span>}
+    <nav
+      style={{
+        backgroundColor: 'var(--surface)',
+        borderBottom: '1px solid var(--border)',
+      }}
+      className="px-8 py-4 flex items-center justify-between"
+    >
+      <span
+        className="font-cormorant text-xl tracking-widest"
+        style={{ color: 'var(--gold)', fontWeight: 600, letterSpacing: '0.15em' }}
+      >
+        TASKS
+      </span>
+      <div className="flex items-center gap-6">
+        {user && (
+          <span className="text-xs tracking-widest uppercase" style={{ color: 'var(--muted)', letterSpacing: '0.1em' }}>
+            {user.username}
+          </span>
+        )}
         <button
           onClick={handleLogout}
-          className="border border-white/30 px-3 py-1 rounded hover:bg-white/10 transition"
+          className="text-xs tracking-widest uppercase transition-colors"
+          style={{ color: 'var(--muted)', letterSpacing: '0.1em', background: 'none', border: 'none', cursor: 'pointer' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--cream)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
+
         >
           退出
         </button>
