@@ -15,7 +15,10 @@ const priorityFilters: { label: string; value: Priority | null }[] = [
 ]
 
 export default function FilterBar() {
-  const { filterStatus, filterPriority, setFilterStatus, setFilterPriority } = useTodoStore()
+  const filterStatus = useTodoStore((s) => s.filterStatus)
+  const filterPriority = useTodoStore((s) => s.filterPriority)
+  const setFilterStatus = useTodoStore((s) => s.setFilterStatus)
+  const setFilterPriority = useTodoStore((s) => s.setFilterPriority)
 
   return (
     <div className="flex gap-2 flex-wrap mb-4 text-sm">

@@ -15,11 +15,9 @@ const priorityLabels: Record<Priority, string> = {
 }
 
 export default function TodoItem({ todo }: { todo: Todo }) {
-  const { toggleTodo, deleteTodo, updateTodo } = useTodoStore((s) => ({
-    toggleTodo: s.toggleTodo,
-    deleteTodo: s.deleteTodo,
-    updateTodo: s.updateTodo,
-  }))
+  const toggleTodo = useTodoStore((s) => s.toggleTodo)
+  const deleteTodo = useTodoStore((s) => s.deleteTodo)
+  const updateTodo = useTodoStore((s) => s.updateTodo)
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(todo.title)
 

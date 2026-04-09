@@ -2,7 +2,10 @@ import { useTodoStore } from '../store/todoStore'
 import TodoItem from './TodoItem'
 
 export default function TodoList() {
-  const { todos, filterStatus, filterPriority, deleteTodo } = useTodoStore()
+  const todos = useTodoStore((s) => s.todos)
+  const filterStatus = useTodoStore((s) => s.filterStatus)
+  const filterPriority = useTodoStore((s) => s.filterPriority)
+  const deleteTodo = useTodoStore((s) => s.deleteTodo)
 
   const filtered = todos.filter((t) => {
     if (filterStatus === 'active' && t.completed) return false
