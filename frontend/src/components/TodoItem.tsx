@@ -51,7 +51,7 @@ export default function TodoItem({ todo }: { todo: Todo }) {
           </p>
         )}
         <p className="text-xs text-white/40 mt-0.5">
-          {todo.due_date && `📅 ${todo.due_date} · `}
+          {todo.due_date && `📅 ${todo.due_date.replace('T', ' ')} · `}
           {priorityLabels[todo.priority]}
         </p>
       </div>

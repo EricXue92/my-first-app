@@ -2,10 +2,16 @@ import { useState } from 'react'
 import { useTodoStore } from '../store/todoStore'
 import type { Priority } from '../types'
 
+function getMinDateTime() {
+  const now = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:00`
+}
+
 export default function TodoForm() {
   const createTodo = useTodoStore((s) => s.createTodo)
   const [title, setTitle] = useState('')
-  const [priority, setPriority] = useState<Priority>('medium')
+  const [priority, setPriority] = useState<Priority>('low')
   const [dueDate, setDueDate] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -13,7 +19,7 @@ export default function TodoForm() {
     if (!title.trim()) return
     await createTodo({ title: title.trim(), priority, due_date: dueDate || undefined })
     setTitle('')
-    setPriority('medium')
+    setPriority('low')
     setDueDate('')
   }
 
@@ -35,8 +41,10 @@ export default function TodoForm() {
         <option value="low">🟢 低</option>
       </select>
       <input
-        type="date"
+        type="datetime-local"
         value={dueDate}
+        min={getMinDateTime()}
+        step={3600}
         onChange={(e) => setDueDate(e.target.value)}
         className="border border-gray-600 bg-gray-700 text-white rounded px-2 py-2 text-sm"
       />
