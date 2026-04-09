@@ -1,8 +1,11 @@
 import os
+import random
+import string
 from datetime import datetime, timedelta, timezone
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
@@ -18,6 +21,21 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+# In-memory store: { email: { code, expires_at } }
+pending_codes: dict = {}
+
+def _get_mail_config() -> ConnectionConfig:
+    return ConnectionConfig(
+        MAIL_USERNAME=os.getenv("MAIL_USERNAME", ""),
+        MAIL_PASSWORD=os.getenv("MAIL_PASSWORD", ""),
+        MAIL_FROM=os.getenv("MAIL_FROM", os.getenv("MAIL_USERNAME", "noreply@example.com")),
+        MAIL_PORT=int(os.getenv("MAIL_PORT", "465")),
+        MAIL_SERVER=os.getenv("MAIL_SERVER", "smtp.gmail.com"),
+        MAIL_STARTTLS=False,
+        MAIL_SSL_TLS=True,
+        USE_CREDENTIALS=bool(os.getenv("MAIL_USERNAME", "")),
+    )
 
 
 def get_password_hash(password: str) -> str:
@@ -57,12 +75,58 @@ def get_current_user(
     return user
 
 
+async def _send_verification_email(email: str, code: str):
+    """Send verification code via email. Logs to console if MAIL_USERNAME is not configured."""
+    if not os.getenv("MAIL_USERNAME"):
+        print(f"[DEV] Verification code for {email}: {code}")
+        return
+    message = MessageSchema(
+        subject="【TodoApp】邮箱验证码",
+        recipients=[email],
+        body=f"您的验证码是：{code}\n\n验证码 10 分钟内有效，请勿泄露给他人。",
+        subtype=MessageType.plain,
+    )
+    fm = FastMail(_get_mail_config())
+    await fm.send_message(message)
+
+
+@router.post("/send-code")
+async def send_code(
+    request: schemas.SendCodeRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    email = request.email
+    if db.query(models.User).filter(models.User.email == email).first():
+        raise HTTPException(status_code=400, detail="该邮箱已被注册")
+
+    code = "".join(random.choices(string.digits, k=6))
+    pending_codes[email] = {
+        "code": code,
+        "expires_at": datetime.now(timezone.utc) + timedelta(minutes=10),
+    }
+    background_tasks.add_task(_send_verification_email, email, code)
+    return {"message": "验证码已发送，请查收邮件"}
+
+
 @router.post("/register", response_model=schemas.UserResponse, status_code=201)
 def register(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
+    # Verify code
+    entry = pending_codes.get(user_data.email)
+    if not entry:
+        raise HTTPException(status_code=400, detail="请先获取验证码")
+    if datetime.now(timezone.utc) > entry["expires_at"]:
+        pending_codes.pop(user_data.email, None)
+        raise HTTPException(status_code=400, detail="验证码已过期，请重新获取")
+    if entry["code"] != user_data.code:
+        raise HTTPException(status_code=400, detail="验证码错误")
+
+    # Check duplicates
     if db.query(models.User).filter(models.User.username == user_data.username).first():
-        raise HTTPException(status_code=400, detail="Username already registered")
+        raise HTTPException(status_code=400, detail="用户名已被注册")
     if db.query(models.User).filter(models.User.email == user_data.email).first():
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="该邮箱已被注册")
+
     user = models.User(
         username=user_data.username,
         email=user_data.email,
@@ -71,6 +135,7 @@ def register(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
     db.add(user)
     db.commit()
     db.refresh(user)
+    pending_codes.pop(user_data.email, None)
     return user
 
 
@@ -80,7 +145,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="用户名或密码错误",
             headers={"WWW-Authenticate": "Bearer"},
         )
     token = create_access_token({"sub": user.username})

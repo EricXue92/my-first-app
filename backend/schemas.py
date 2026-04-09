@@ -1,13 +1,18 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from typing import Optional
 from models import Priority
 
 
-class UserCreate(BaseModel):
-    username: str
+class SendCodeRequest(BaseModel):
     email: EmailStr
-    password: str
+
+
+class UserCreate(BaseModel):
+    username: str = Field(min_length=3)
+    email: EmailStr
+    password: str = Field(min_length=6)
+    code: str
 
 
 class UserResponse(BaseModel):
