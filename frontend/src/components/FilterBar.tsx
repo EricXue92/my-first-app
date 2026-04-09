@@ -21,12 +21,12 @@ export default function FilterBar() {
   const setFilterPriority = useTodoStore((s) => s.setFilterPriority)
 
   return (
-    <div className="flex gap-2 flex-wrap mb-4 text-sm">
+    <div className="flex gap-2 flex-wrap mb-5 text-base">
       {statusFilters.map((f) => (
         <button
           key={f.value}
           onClick={() => setFilterStatus(f.value)}
-          className={`px-3 py-1 rounded-full border transition ${
+          className={`px-4 py-1.5 rounded-full border transition ${
             filterStatus === f.value
               ? 'bg-blue-600/30 border-blue-400/60 text-blue-300'
               : 'border-white/15 text-white/60 hover:border-white/30'
@@ -40,7 +40,7 @@ export default function FilterBar() {
         <button
           key={String(f.value)}
           onClick={() => setFilterPriority(f.value)}
-          className={`px-3 py-1 rounded-full border transition ${
+          className={`px-4 py-1.5 rounded-full border transition ${
             filterPriority === f.value
               ? 'bg-blue-600/30 border-blue-400/60 text-blue-300'
               : 'border-white/15 text-white/60 hover:border-white/30'

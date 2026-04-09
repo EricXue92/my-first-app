@@ -24,17 +24,17 @@ export default function TodoForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 mb-4 flex-wrap">
+    <form onSubmit={handleSubmit} className="flex gap-2 mb-5 flex-wrap">
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="输入新的待办事项..."
-        className="flex-1 min-w-48 border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+        className="flex-1 min-w-48 border border-gray-600 bg-gray-700 text-white rounded-lg px-4 py-2.5 text-base focus:outline-none focus:border-blue-400"
       />
       <select
         value={priority}
         onChange={(e) => setPriority(e.target.value as Priority)}
-        className="border border-gray-600 bg-gray-700 text-white rounded px-2 py-2 text-sm"
+        className="border border-gray-600 bg-gray-700 text-white rounded-lg px-3 py-2.5 text-base"
       >
         <option value="high">🔴 高</option>
         <option value="medium">🟡 中</option>
@@ -45,11 +45,11 @@ export default function TodoForm() {
         value={dueDate}
         min={getMinDateTime()}
         onChange={(e) => setDueDate(e.target.value)}
-        className="border border-gray-600 bg-gray-700 text-white rounded px-2 py-2 text-sm"
+        className="border border-gray-600 bg-gray-700 text-white rounded-lg px-3 py-2.5 text-base"
       />
       <button
         type="submit"
-        className="bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-2 text-sm transition"
+        className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-5 py-2.5 text-base transition"
       >
         + 添加
       </button>

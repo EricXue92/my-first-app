@@ -27,10 +27,10 @@ export default function TodoList() {
           <TodoItem key={todo.id} todo={todo} />
         ))}
         {filtered.length === 0 && (
-          <p className="text-center text-white/30 py-8 text-sm">暂无待办事项</p>
+          <p className="text-center text-white/30 py-8 text-base">暂无待办事项</p>
         )}
       </div>
-      <div className="mt-4 pt-3 border-t border-white/10 flex justify-between text-xs text-white/40">
+      <div className="mt-4 pt-3 border-t border-white/10 flex justify-between text-sm text-white/40">
         <span>共 {todos.length} 条 · {todos.length - completedCount} 条进行中</span>
         {completedCount > 0 && (
           <button onClick={clearCompleted} className="hover:text-white/70 transition">
