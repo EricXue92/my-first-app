@@ -45,7 +45,13 @@ export default function TodoForm() {
         value={dueDate}
         min={getMinDateTime()}
         step={3600}
-        onChange={(e) => setDueDate(e.target.value)}
+        onChange={(e) => {
+          const value = e.target.value
+          if (!value) { setDueDate(''); return }
+          const [date, time] = value.split('T')
+          const hours = time ? time.split(':')[0] : '00'
+          setDueDate(`${date}T${hours}:00`)
+        }}
         className="border border-gray-600 bg-gray-700 text-white rounded px-2 py-2 text-sm"
       />
       <button
