@@ -67,78 +67,82 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="bg-gray-800 p-8 rounded-lg w-full max-w-sm">
-        <h1 className="text-white text-2xl font-bold mb-6 text-center">创建账号</h1>
+    <div
+      className="min-h-screen flex items-center justify-center px-4"
+      style={{ backgroundColor: 'var(--bg)' }}
+    >
+      <div
+        className="w-full max-w-sm px-10 py-12"
+        style={{
+          backgroundColor: 'var(--surface)',
+          border: '1px solid var(--border)',
+        }}
+      >
+        <div className="mb-10 text-center">
+          <p
+            className="font-cormorant text-4xl tracking-widest mb-2"
+            style={{ color: 'var(--gold)', fontWeight: 600, letterSpacing: '0.2em' }}
+          >
+            TASKS
+          </p>
+          <p className="text-xs tracking-widest uppercase" style={{ color: 'var(--muted)', letterSpacing: '0.15em' }}>
+            创建新账号
+          </p>
+        </div>
 
         {step === 1 ? (
-          <form onSubmit={handleSendCode} className="flex flex-col gap-4">
-            <input
-              value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
-              placeholder="用户名（至少3位）"
-              required
-              className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-blue-400"
-            />
-            <input
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              placeholder="邮箱"
-              required
-              className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-blue-400"
-            />
-            <input
-              type="password"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              placeholder="密码（至少6位）"
-              required
-              className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-blue-400"
-            />
-            <input
-              type="password"
-              value={form.confirmPassword}
-              onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-              placeholder="确认密码"
-              required
-              className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-blue-400"
-            />
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+          <form onSubmit={handleSendCode} className="flex flex-col gap-7">
+            <input className="input-underline" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} placeholder="用户名（至少3位）" required />
+            <input type="email" className="input-underline" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="邮箱" required />
+            <input type="password" className="input-underline" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="密码（至少6位）" required />
+            <input type="password" className="input-underline" value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} placeholder="确认密码" required />
+
+            {error && <p className="text-xs" style={{ color: 'var(--brick)' }}>{error}</p>}
+
             <button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded py-2 transition"
+              className="w-full py-3 text-sm tracking-widest uppercase font-medium transition-opacity disabled:opacity-40"
+              style={{ backgroundColor: 'var(--gold)', color: 'var(--bg)', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', letterSpacing: '0.15em' }}
             >
               {loading ? '发送中...' : '发送验证码'}
             </button>
           </form>
         ) : (
-          <form onSubmit={handleRegister} className="flex flex-col gap-4">
-            <p className="text-gray-400 text-sm text-center">
-              验证码已发送至 <span className="text-blue-400">{form.email}</span>
+          <form onSubmit={handleRegister} className="flex flex-col gap-7">
+            <p className="text-xs text-center" style={{ color: 'var(--muted)' }}>
+              验证码已发送至{' '}
+              <span style={{ color: 'var(--gold)' }}>{form.email}</span>
             </p>
+
             <input
+              className="input-underline text-center text-2xl tracking-[0.5em] font-cormorant"
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              placeholder="请输入6位验证码"
+              placeholder="——————"
               required
               maxLength={6}
-              className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-blue-400 tracking-widest text-center text-lg"
             />
-            {error && <p className="text-red-400 text-sm">{error}</p>}
+
+            {error && <p className="text-xs" style={{ color: 'var(--brick)' }}>{error}</p>}
+
             <button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded py-2 transition"
+              className="w-full py-3 text-sm tracking-widest uppercase font-medium transition-opacity disabled:opacity-40"
+              style={{ backgroundColor: 'var(--gold)', color: 'var(--bg)', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', letterSpacing: '0.15em' }}
             >
               {loading ? '注册中...' : '完成注册'}
             </button>
+
             <div className="flex items-center justify-between">
               <button
                 type="button"
                 onClick={() => { setStep(1); setError(''); setCode('') }}
-                className="text-gray-400 hover:text-white text-sm transition"
+                className="text-xs uppercase tracking-widest transition-colors"
+                style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--cream)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
               >
                 修改信息
               </button>
@@ -146,17 +150,18 @@ export default function RegisterPage() {
                 type="button"
                 onClick={handleResend}
                 disabled={countdown > 0 || loading}
-                className="text-blue-400 hover:text-blue-300 disabled:text-gray-500 text-sm transition"
+                className="text-xs uppercase tracking-widest transition-colors disabled:opacity-30"
+                style={{ color: 'var(--gold)', background: 'none', border: 'none', cursor: countdown > 0 ? 'not-allowed' : 'pointer' }}
               >
-                {countdown > 0 ? `重新发送 (${countdown}s)` : '重新发送'}
+                {countdown > 0 ? `重发 (${countdown}s)` : '重新发送'}
               </button>
             </div>
           </form>
         )}
 
-        <p className="text-white/50 text-sm text-center mt-4">
+        <p className="text-xs text-center mt-8" style={{ color: 'var(--muted)' }}>
           已有账号？{' '}
-          <Link to="/login" className="text-blue-400 hover:underline">登录</Link>
+          <Link to="/login" style={{ color: 'var(--gold)' }}>登录</Link>
         </p>
       </div>
     </div>

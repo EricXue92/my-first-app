@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTodoStore } from '../store/todoStore'
 import type { Priority } from '../types'
+import DateTimePicker from './DateTimePicker'
 
 function getMinDateTime() {
   const now = new Date()
@@ -23,36 +24,60 @@ export default function TodoForm() {
     setDueDate('')
   }
 
+  const priorityClass = (p: Priority) => {
+    if (priority !== p) return ''
+    return p === 'high' ? 'active-high' : p === 'medium' ? 'active-medium' : 'active-low'
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 mb-5 flex-wrap">
+    <form
+      onSubmit={handleSubmit}
+      className="mb-8 p-6"
+      style={{
+        backgroundColor: 'var(--surface-2)',
+        border: '1px solid var(--border)',
+      }}
+    >
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="输入新的待办事项..."
-        className="flex-1 min-w-48 border border-gray-600 bg-gray-700 text-white rounded-lg px-4 py-2.5 text-base focus:outline-none focus:border-blue-400"
+        placeholder="记录新的任务..."
+        className="input-underline text-base mb-5"
+        style={{ fontSize: '1.05rem' }}
       />
-      <select
-        value={priority}
-        onChange={(e) => setPriority(e.target.value as Priority)}
-        className="border border-gray-600 bg-gray-700 text-white rounded-lg px-3 py-2.5 text-base"
-      >
-        <option value="high">🔴 高</option>
-        <option value="medium">🟡 中</option>
-        <option value="low">🟢 低</option>
-      </select>
-      <input
-        type="datetime-local"
-        value={dueDate}
-        min={getMinDateTime()}
-        onChange={(e) => setDueDate(e.target.value)}
-        className="border border-gray-600 bg-gray-700 text-white rounded-lg px-3 py-2.5 text-base"
-      />
-      <button
-        type="submit"
-        className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-5 py-2.5 text-base transition"
-      >
-        + 添加
-      </button>
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="priority-seg">
+          {(['high', 'medium', 'low'] as Priority[]).map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => setPriority(p)}
+              className={priorityClass(p)}
+            >
+              {p === 'high' ? '高' : p === 'medium' ? '中' : '低'}
+            </button>
+          ))}
+        </div>
+        <DateTimePicker
+          value={dueDate}
+          min={getMinDateTime()}
+          onChange={setDueDate}
+        />
+        <button
+          type="submit"
+          className="px-6 py-2 text-sm tracking-widest uppercase font-medium transition-opacity"
+          style={{
+            backgroundColor: 'var(--gold)',
+            color: 'var(--bg)',
+            border: 'none',
+            cursor: 'pointer',
+            letterSpacing: '0.1em',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          + 添加
+        </button>
+      </div>
     </form>
   )
 }
