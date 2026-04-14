@@ -67,10 +67,16 @@ def test_delete_todo(client, auth_headers):
 
 
 def test_cannot_access_other_users_todo(client, auth_headers):
+    from datetime import datetime, timedelta, timezone
+    from routers.auth import pending_codes
     t = client.post("/api/todos", json={"title": "Private"}, headers=auth_headers).json()
 
+    pending_codes["other@example.com"] = {
+        "code": "000000",
+        "expires_at": datetime.now(timezone.utc) + timedelta(minutes=10),
+    }
     client.post("/api/auth/register", json={
-        "username": "other", "email": "other@example.com", "password": "pass123"
+        "username": "other", "email": "other@example.com", "password": "pass123", "code": "000000"
     })
     login = client.post("/api/auth/login", data={"username": "other", "password": "pass123"})
     other_headers = {"Authorization": f"Bearer {login.json()['access_token']}"}

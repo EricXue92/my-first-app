@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 
-export default function RegisterPage() {
-  const { sendCode, register } = useAuthStore()
+export default function ForgotPasswordPage() {
+  const { sendResetCode, resetPassword } = useAuthStore()
   const navigate = useNavigate()
 
-  const [form, setForm] = useState({ username: '', email: '', password: '', confirmPassword: '' })
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [code, setCode] = useState('')
   const [step, setStep] = useState<1 | 2>(1)
   const [error, setError] = useState('')
@@ -22,12 +24,11 @@ export default function RegisterPage() {
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    if (form.username.length < 3) { setError('用户名至少需要3个字符'); return }
-    if (form.password.length < 6) { setError('密码至少需要6个字符'); return }
-    if (form.password !== form.confirmPassword) { setError('两次输入的密码不一致'); return }
+    if (password.length < 6) { setError('密码至少需要6个字符'); return }
+    if (password !== confirmPassword) { setError('两次输入的密码不一致'); return }
     setLoading(true)
     try {
-      await sendCode(form.email)
+      await sendResetCode(email)
       setStep(2)
       setCountdown(60)
     } catch (err: any) {
@@ -42,7 +43,7 @@ export default function RegisterPage() {
     setError('')
     setLoading(true)
     try {
-      await sendCode(form.email)
+      await sendResetCode(email)
       setCountdown(60)
     } catch (err: any) {
       setError(err.response?.data?.detail || '发送失败，请重试')
@@ -51,16 +52,16 @@ export default function RegisterPage() {
     }
   }
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleReset = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     if (code.length !== 6) { setError('请输入6位验证码'); return }
     setLoading(true)
     try {
-      await register(form.username, form.email, form.password, code)
-      navigate('/login')
+      await resetPassword(email, code, password)
+      navigate('/login', { state: { resetSuccess: true } })
     } catch (err: any) {
-      setError(err.response?.data?.detail || '注册失败，请重试')
+      setError(err.response?.data?.detail || '重置失败，请重试')
     } finally {
       setLoading(false)
     }
@@ -86,16 +87,15 @@ export default function RegisterPage() {
             TASKS
           </p>
           <p className="text-xs tracking-widest uppercase" style={{ color: 'var(--muted)', letterSpacing: '0.15em' }}>
-            创建新账号
+            重置密码
           </p>
         </div>
 
         {step === 1 ? (
           <form onSubmit={handleSendCode} className="flex flex-col gap-7">
-            <input className="input-underline" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} placeholder="用户名（至少3位）" required />
-            <input type="email" className="input-underline" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="邮箱" required />
-            <input type="password" className="input-underline" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="密码（至少6位）" required />
-            <input type="password" className="input-underline" value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} placeholder="确认密码" required />
+            <input type="email" className="input-underline" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="注册邮箱" required />
+            <input type="password" className="input-underline" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="新密码（至少6位）" required />
+            <input type="password" className="input-underline" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="确认新密码" required />
 
             {error && <p className="text-xs" style={{ color: 'var(--brick)' }}>{error}</p>}
 
@@ -109,10 +109,10 @@ export default function RegisterPage() {
             </button>
           </form>
         ) : (
-          <form onSubmit={handleRegister} className="flex flex-col gap-7">
+          <form onSubmit={handleReset} className="flex flex-col gap-7">
             <p className="text-xs text-center" style={{ color: 'var(--muted)' }}>
               验证码已发送至{' '}
-              <span style={{ color: 'var(--gold)' }}>{form.email}</span>
+              <span style={{ color: 'var(--gold)' }}>{email}</span>
             </p>
 
             <input
@@ -132,7 +132,7 @@ export default function RegisterPage() {
               className="w-full py-3 text-sm tracking-widest uppercase font-medium transition-opacity disabled:opacity-40"
               style={{ backgroundColor: 'var(--gold)', color: 'var(--bg)', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', letterSpacing: '0.15em' }}
             >
-              {loading ? '注册中...' : '完成注册'}
+              {loading ? '重置中...' : '重置密码'}
             </button>
 
             <div className="flex items-center justify-between">
@@ -159,41 +159,8 @@ export default function RegisterPage() {
           </form>
         )}
 
-        <div className="flex items-center gap-3 mt-8 mb-6">
-          <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border)' }} />
-          <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--muted)' }}>或</span>
-          <div className="flex-1 h-px" style={{ backgroundColor: 'var(--border)' }} />
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <a
-            href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/auth/google`}
-            className="w-full py-3 text-sm tracking-widest uppercase font-medium text-center block transition-opacity"
-            style={{
-              color: 'var(--gold)',
-              border: '1px solid var(--gold)',
-              backgroundColor: 'transparent',
-              letterSpacing: '0.15em',
-            }}
-          >
-            Google 登录
-          </a>
-          <a
-            href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/auth/github`}
-            className="w-full py-3 text-sm tracking-widest uppercase font-medium text-center block transition-opacity"
-            style={{
-              color: 'var(--gold)',
-              border: '1px solid var(--gold)',
-              backgroundColor: 'transparent',
-              letterSpacing: '0.15em',
-            }}
-          >
-            GitHub 登录
-          </a>
-        </div>
-
-        <p className="text-xs text-center mt-6" style={{ color: 'var(--muted)' }}>
-          已有账号？{' '}
+        <p className="text-xs text-center mt-8" style={{ color: 'var(--muted)' }}>
+          已想起密码？{' '}
           <Link to="/login" style={{ color: 'var(--gold)' }}>登录</Link>
         </p>
       </div>

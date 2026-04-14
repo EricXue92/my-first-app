@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime, timedelta, timezone
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -21,6 +22,19 @@ def override_get_db():
         db.close()
 
 
+@pytest.fixture(autouse=True)
+def clear_codes():
+    from routers.auth import pending_codes, reset_codes
+    from routers.oauth import oauth_states
+    pending_codes.clear()
+    reset_codes.clear()
+    oauth_states.clear()
+    yield
+    pending_codes.clear()
+    reset_codes.clear()
+    oauth_states.clear()
+
+
 @pytest.fixture
 def client():
     from database import Base
@@ -35,10 +49,16 @@ def client():
 
 @pytest.fixture
 def registered_user(client):
+    from routers.auth import pending_codes
+    pending_codes["test@example.com"] = {
+        "code": "000000",
+        "expires_at": datetime.now(timezone.utc) + timedelta(minutes=10),
+    }
     r = client.post("/api/auth/register", json={
         "username": "testuser",
         "email": "test@example.com",
-        "password": "testpassword123"
+        "password": "testpassword123",
+        "code": "000000",
     })
     assert r.status_code == 201, f"Registration failed: {r.json()}"
     return r.json()

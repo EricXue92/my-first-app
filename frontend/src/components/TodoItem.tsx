@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Todo, Priority } from '../types'
 import { useTodoStore } from '../store/todoStore'
+import DateTimePicker from './DateTimePicker'
 
 const priorityBar: Record<Priority, string> = {
   high: 'var(--brick)',
@@ -20,11 +21,25 @@ export default function TodoItem({ todo }: { todo: Todo }) {
   const updateTodo = useTodoStore((s) => s.updateTodo)
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(todo.title)
+  const [editDueDate, setEditDueDate] = useState(todo.due_date ?? '')
   const [hovered, setHovered] = useState(false)
+
+  const handleEdit = () => {
+    setEditTitle(todo.title)
+    setEditDueDate(todo.due_date ?? '')
+    setEditing(true)
+  }
 
   const handleSave = async () => {
     if (!editTitle.trim()) return
-    await updateTodo(todo.id, { title: editTitle.trim() })
+    await updateTodo(todo.id, {
+      title: editTitle.trim(),
+      due_date: editDueDate || undefined,
+    })
+    setEditing(false)
+  }
+
+  const handleCancel = () => {
     setEditing(false)
   }
 
@@ -38,6 +53,8 @@ export default function TodoItem({ todo }: { todo: Todo }) {
         borderRight: '1px solid var(--border)',
         borderBottom: '1px solid var(--border)',
         opacity: todo.completed ? 0.5 : 1,
+        position: 'relative',
+        zIndex: editing ? 20 : 'auto',
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -71,19 +88,61 @@ export default function TodoItem({ todo }: { todo: Todo }) {
       {/* Content */}
       <div className="flex-1 min-w-0">
         {editing ? (
-          <input
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            onBlur={handleSave}
-            onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-            autoFocus
-            className="w-full bg-transparent outline-none text-sm"
-            style={{
-              color: 'var(--cream)',
-              borderBottom: '1px solid var(--gold)',
-              paddingBottom: '2px',
-            }}
-          />
+          <div>
+            <input
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSave()
+                if (e.key === 'Escape') handleCancel()
+              }}
+              autoFocus
+              className="w-full bg-transparent outline-none text-sm"
+              style={{
+                color: 'var(--cream)',
+                borderBottom: '1px solid var(--gold)',
+                paddingBottom: '2px',
+              }}
+            />
+            <div className="flex items-center gap-2 mt-2">
+              <DateTimePicker value={editDueDate} onChange={setEditDueDate} />
+              <button
+                type="button"
+                onClick={handleSave}
+                style={{
+                  padding: '0.3rem 0.7rem',
+                  fontSize: '0.72rem',
+                  fontFamily: 'DM Sans, sans-serif',
+                  backgroundColor: 'var(--gold)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                保存
+              </button>
+              <button
+                type="button"
+                onClick={handleCancel}
+                style={{
+                  padding: '0.3rem 0.6rem',
+                  fontSize: '0.72rem',
+                  fontFamily: 'DM Sans, sans-serif',
+                  backgroundColor: 'transparent',
+                  color: 'var(--muted)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                取消
+              </button>
+            </div>
+          </div>
         ) : (
           <p
             className="text-sm font-medium truncate"
@@ -95,19 +154,21 @@ export default function TodoItem({ todo }: { todo: Todo }) {
             {todo.title}
           </p>
         )}
-        <div className="flex items-center gap-3 mt-1">
-          {todo.due_date && (
-            <span className="text-xs" style={{ color: 'var(--muted)' }}>
-              {todo.due_date.replace('T', ' ').slice(0, 16)}
+        {!editing && (
+          <div className="flex items-center gap-3 mt-1">
+            {todo.due_date && (
+              <span className="text-xs" style={{ color: 'var(--muted)' }}>
+                {todo.due_date.replace('T', ' ').slice(0, 16)}
+              </span>
+            )}
+            <span
+              className="text-xs uppercase tracking-widest"
+              style={{ color: priorityBar[todo.priority], letterSpacing: '0.08em', fontSize: '0.65rem' }}
+            >
+              {priorityLabel[todo.priority]}
             </span>
-          )}
-          <span
-            className="text-xs uppercase tracking-widest"
-            style={{ color: priorityBar[todo.priority], letterSpacing: '0.08em', fontSize: '0.65rem' }}
-          >
-            {priorityLabel[todo.priority]}
-          </span>
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Actions */}
@@ -116,7 +177,7 @@ export default function TodoItem({ todo }: { todo: Todo }) {
         style={{ opacity: hovered ? 1 : 0 }}
       >
         <button
-          onClick={() => setEditing(true)}
+          onClick={handleEdit}
           aria-label="编辑"
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: 0, lineHeight: 1 }}
           onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--cream)')}

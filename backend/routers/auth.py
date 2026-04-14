@@ -24,6 +24,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 # In-memory store: { email: { code, expires_at } }
 pending_codes: dict = {}
+reset_codes: dict = {}
 
 def _get_mail_config() -> ConnectionConfig:
     return ConnectionConfig(
@@ -90,6 +91,21 @@ async def _send_verification_email(email: str, code: str):
     await fm.send_message(message)
 
 
+async def _send_reset_email(email: str, code: str):
+    """Send password reset code via email."""
+    if not os.getenv("MAIL_USERNAME"):
+        print(f"[DEV] Reset code for {email}: {code}")
+        return
+    message = MessageSchema(
+        subject="【TodoApp】密码重置验证码",
+        recipients=[email],
+        body=f"您的密码重置验证码是：{code}\n\n验证码 10 分钟内有效，请勿泄露给他人。",
+        subtype=MessageType.plain,
+    )
+    fm = FastMail(_get_mail_config())
+    await fm.send_message(message)
+
+
 @router.post("/send-code")
 async def send_code(
     request: schemas.SendCodeRequest,
@@ -142,7 +158,18 @@ def register(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
 @router.post("/login", response_model=schemas.Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.username == form_data.username).first()
-    if not user or not verify_password(form_data.password, user.hashed_password):
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="用户名或密码错误",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not user.hashed_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="该账号通过第三方登录，请使用 Google 或 GitHub 登录",
+        )
+    if not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="用户名或密码错误",
@@ -155,3 +182,43 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 @router.get("/me", response_model=schemas.UserResponse)
 def read_me(current_user: models.User = Depends(get_current_user)):
     return current_user
+
+
+@router.post("/send-reset-code")
+async def send_reset_code(
+    request: schemas.SendCodeRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    email = request.email
+    if not db.query(models.User).filter(models.User.email == email).first():
+        raise HTTPException(status_code=400, detail="该邮箱未注册")
+
+    code = "".join(random.choices(string.digits, k=6))
+    reset_codes[email] = {
+        "code": code,
+        "expires_at": datetime.now(timezone.utc) + timedelta(minutes=10),
+    }
+    background_tasks.add_task(_send_reset_email, email, code)
+    return {"message": "验证码已发送，请查收邮件"}
+
+
+@router.post("/reset-password")
+def reset_password(data: schemas.PasswordReset, db: Session = Depends(get_db)):
+    entry = reset_codes.get(data.email)
+    if not entry:
+        raise HTTPException(status_code=400, detail="请先获取验证码")
+    if datetime.now(timezone.utc) > entry["expires_at"]:
+        reset_codes.pop(data.email, None)
+        raise HTTPException(status_code=400, detail="验证码已过期，请重新获取")
+    if entry["code"] != data.code:
+        raise HTTPException(status_code=400, detail="验证码错误")
+
+    user = db.query(models.User).filter(models.User.email == data.email).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="用户不存在")
+
+    user.hashed_password = get_password_hash(data.new_password)
+    db.commit()
+    reset_codes.pop(data.email, None)
+    return {"message": "密码重置成功，请重新登录"}
