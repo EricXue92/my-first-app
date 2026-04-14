@@ -67,7 +67,6 @@ export default function DateTimePicker({ value, min, onChange }: Props) {
   )
 
   const minDateStr = min ? min.split('T')[0] : ''
-  const minTimeStr = min ? (min.split('T')[1] || '') : ''
 
   // Close on outside click
   useEffect(() => {

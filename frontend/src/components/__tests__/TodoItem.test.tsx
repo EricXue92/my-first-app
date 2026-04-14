@@ -31,14 +31,14 @@ describe('TodoItem', () => {
   it('calls toggleTodo on checkbox click', async () => {
     const { default: TodoItem } = await import('../TodoItem')
     render(<TodoItem todo={mockTodo} />)
-    await userEvent.click(screen.getByRole('checkbox'))
+    await userEvent.click(screen.getByRole('button', { name: 'toggle' }))
     expect(mockToggle).toHaveBeenCalledWith(1)
   })
 
   it('calls deleteTodo on delete button click', async () => {
     const { default: TodoItem } = await import('../TodoItem')
     render(<TodoItem todo={mockTodo} />)
-    await userEvent.click(screen.getByRole('button', { name: '🗑️' }))
+    await userEvent.click(screen.getByRole('button', { name: '删除' }))
     expect(mockDelete).toHaveBeenCalledWith(1)
   })
 })

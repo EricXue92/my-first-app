@@ -29,6 +29,12 @@ class Token(BaseModel):
     token_type: str
 
 
+class PasswordReset(BaseModel):
+    email: EmailStr
+    code: str
+    new_password: str = Field(min_length=6)
+
+
 class TodoCreate(BaseModel):
     title: str
     description: Optional[str] = None

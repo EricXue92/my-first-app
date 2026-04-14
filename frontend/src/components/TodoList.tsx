@@ -27,13 +27,19 @@ export default function TodoList() {
           <TodoItem key={todo.id} todo={todo} />
         ))}
         {filtered.length === 0 && (
-          <p className="text-center text-white/30 py-8 text-base">暂无待办事项</p>
+          <p className="text-center py-8 text-base" style={{ color: 'var(--muted)' }}>暂无待办事项</p>
         )}
       </div>
-      <div className="mt-4 pt-3 border-t border-white/10 flex justify-between text-sm text-white/40">
+      <div className="mt-4 pt-3 flex justify-between text-sm" style={{ borderTop: '1px solid var(--border)', color: 'var(--muted)' }}>
         <span>共 {todos.length} 条 · {todos.length - completedCount} 条进行中</span>
         {completedCount > 0 && (
-          <button onClick={clearCompleted} className="hover:text-white/70 transition">
+          <button
+            onClick={clearCompleted}
+            className="transition"
+            style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--brick)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--muted)')}
+          >
             清除已完成
           </button>
         )}

@@ -10,6 +10,9 @@ interface AuthState {
   register: (username: string, email: string, password: string, code: string) => Promise<void>
   logout: () => void
   fetchMe: () => Promise<void>
+  setToken: (token: string) => void
+  sendResetCode: (email: string) => Promise<void>
+  resetPassword: (email: string, code: string, newPassword: string) => Promise<void>
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -40,6 +43,19 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: () => {
     localStorage.removeItem('token')
     set({ user: null, token: null })
+  },
+
+  setToken: (token) => {
+    localStorage.setItem('token', token)
+    set({ token })
+  },
+
+  sendResetCode: async (email) => {
+    await api.post('/auth/send-reset-code', { email })
+  },
+
+  resetPassword: async (email, code, newPassword) => {
+    await api.post('/auth/reset-password', { email, code, new_password: newPassword })
   },
 
   fetchMe: async () => {
